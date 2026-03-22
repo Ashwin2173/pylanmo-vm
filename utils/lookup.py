@@ -1,0 +1,7 @@
+# look up v1.0
+
+INTEGER = 1
+STRING = 2
+IDENTIFIER = 3
+
+PUSH = 1

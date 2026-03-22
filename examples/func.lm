@@ -1,0 +1,21 @@
+main 0 {
+    PUSH 10
+    PUSH 20
+    ADD
+    PUSH print_hello
+    CALL 0
+    RET
+}
+
+print_hello 0 {
+    PUSH "Hello, World"
+    PUSH print
+    CALL 1
+    RET
+}
+
+print 1 {
+    PEEK
+    POP
+    RET
+}
