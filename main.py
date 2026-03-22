@@ -1,7 +1,10 @@
 import sys
 
 from utils.byte_dispenser import ByteDispenser
+from utils.exceptions import Fault
+from utils.lookup import FaultType
 from utils.parser import Parser
+from utils.vm import VM
 
 MAGIC = 2273
 MAJOR_VERSION = 1
@@ -25,7 +28,19 @@ def main(args: list[str]) -> None:
     if major_version != MAJOR_VERSION or minor_version != MINOR_VERSION:
         fault(f"Version v{major_version}.{minor_version} is not supported")
     parser = Parser(bd)
-    print(parser)
+    vm = VM(parser.symbol_table, parser.function_table)
+    try:
+        vm.load_main()
+        while True:
+            vm.step_in()
+    except Fault as f:
+        if f.fault_code != FaultType.DONE:
+            print(f"VM FAULT: {f.fault_code}")
+            sys.exit(1)
+        sys.exit(0)
+    except Exception as e:
+        print(f"VM CORE FAULT: {e}")
+        sys.exit(1)
 
 def fault(message: str, exit_code: int=1):
     print(f"ERROR: {message}")

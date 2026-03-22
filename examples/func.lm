@@ -3,7 +3,7 @@ main 0 {
     PUSH 20
     ADD
     PUSH print_hello
-    CALL 0
+    CALL 1
     RET
 }
 
@@ -12,6 +12,12 @@ print_hello 0 {
     PUSH print
     CALL 1
     RET
+}
+
+print_ashwin 0 {
+    PUSH "Ashwin"
+    PUSH print
+    CALL 1
 }
 
 print 1 {

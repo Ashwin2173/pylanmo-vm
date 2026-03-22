@@ -2,12 +2,13 @@ import utils.lookup as lookup
 
 from utils.byte_dispenser import ByteDispenser
 
-OP_WITH_LOOKUP = {
-    lookup.PUSH
-}
+class Value:
+    def __init__(self, value_type: int, value: any):
+        self.value_type = value_type
+        self.value = value
 
 class OpCode:
-    def __init__(self, op_code: int, data: any):
+    def __init__(self, op_code: int, data: int):
         self.op_code = op_code
         self.data = data
 
@@ -20,8 +21,8 @@ class Function:
 class Parser:
     def __init__(self, bd: ByteDispenser):
         self.bd = bd
-        self.function_table = dict()
-        self.symbol_table   = list()
+        self.function_table = dict[str, Function]()
+        self.symbol_table   = list[Value]()
 
         self.__read_symbols()
         self.__read_functions()
@@ -32,13 +33,16 @@ class Parser:
             symbol_format = self.bd.next_int(1)
             if symbol_format == lookup.INTEGER:
                 size = self.bd.next_int(4)
-                self.symbol_table.append(self.bd.next_int(size))
+                int_value = self.bd.next_int(size)
+                self.symbol_table.append(Value(lookup.INTEGER, int_value))
             elif symbol_format == lookup.STRING:
                 size = self.bd.next_int(4)
-                self.symbol_table.append(self.bd.next_str(size))
+                str_value = self.bd.next_str(size)
+                self.symbol_table.append(Value(lookup.STRING, str_value))
             elif symbol_format == lookup.IDENTIFIER:
                 size = self.bd.next_int(4)
-                self.symbol_table.append(self.bd.next_str(size))
+                identifier = self.bd.next_str(size)
+                self.symbol_table.append(Value(lookup.IDENTIFIER, identifier))
             else:
                 assert False, f"Unhandled DataType: { str(symbol_format) }"
 
@@ -50,9 +54,9 @@ class Parser:
             _ = self.bd.next_int(4)
             _ = self.bd.next_int(2)
             function_body = self.__read_function_body()
-            function_lookup_name = f"{function_name}{function_args}"
+            function_lookup_name = f"{function_name.value}[{function_args}]"
             self.function_table[function_lookup_name] = Function(
-                name = function_name,
+                name = function_name.value,
                 arg_count = function_args,
                 body = function_body
             )
@@ -63,8 +67,6 @@ class Parser:
         for _ in range(op_code_count):
             op_code = self.bd.next_int(1)
             data    = self.bd.next_int(2)
-            if op_code in OP_WITH_LOOKUP:
-                data = self.symbol_table[data]
             function_body.append(OpCode(op_code = op_code, data = data))
         return function_body
 
