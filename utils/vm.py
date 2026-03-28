@@ -5,14 +5,13 @@ from utils.parser import Function, Value, OpCode
 from utils.lookup import FaultType
 
 class VM:
-    def __init__(self, symbol_table: list, function_table: dict):
+    def __init__(self, symbol_table: list[Value], function_table: dict[str, Function]):
         self.function_table = function_table
-        self.symbol_table = symbol_table
+        self.symbol_table: list[Value] = symbol_table
 
-        self.stack = list[Value]()
-        self.frames = list[Frame]()
-        self.globals = dict[str, Value]()
-        self.fault = None
+        self.stack: list[Value] = list()
+        self.frames: list[Frame] = list()
+        self.globals: dict[str, Value] = dict()
         self.op_code_lookup = {
             lookup.OP_PUSH: self.__push,
             lookup.OP_POP: self.__pop,
@@ -26,6 +25,8 @@ class VM:
         if len(self.frames) == 0:
             raise Fault(FaultType.DONE)
         frame: Frame = self.__get_current_frame()
+        if frame.ip >= len(frame.func.body):
+            raise Fault(FaultType.NO_RET)
         current_op: OpCode = frame.func.body[frame.ip]
         if current_op.op_code not in self.op_code_lookup:
             raise NotImplementedError(f"op_code lookup for opcode: {current_op.op_code}")
@@ -33,20 +34,17 @@ class VM:
         frame.ip += 1
 
     def load_main(self):
-        name = Value(lookup.IDENTIFIER, "main")
-        self.__load_function(name, 0)
+        self.stack.append(Value(lookup.FUNCTION, "main"))
+        self.__load_function(0)
 
-    def __load_function(self, name: Value, args: int) -> None:
-        if name.value_type != lookup.IDENTIFIER:
-            raise Fault(FaultType.TYPE_ERROR)
-        func: Function = self.function_table.get(f"{name.value}[{args}]")
+    def __load_function(self, args: int) -> None:
+        name = self.stack[-args - 1]
+        func: Function = self.function_table.get(name.value)
         if func is None:
             raise Fault(FaultType.UNDEFINED_FUNCTION)
-        if len(self.stack) - args < 0:
-            raise Fault(FaultType.STACK_UNDERFLOW)
         self.frames.append(Frame(
             func = func,
-            base_pointer = len(self.stack) - func.arg_count
+            base_pointer = len(self.stack) - args
         ))
 
     def __get_current_frame(self):
@@ -70,7 +68,7 @@ class VM:
         elif left.value_type == lookup.INTEGER and right.value_type == lookup.INTEGER:
             self.stack.append(Value(lookup.INTEGER, left.value + right.value))
         else:
-            self.fault = FaultType.TYPE_ERROR
+            raise Fault(FaultType.TYPE_ERROR)
 
     def __peek(self, _) -> None:
         self.__check_stack_underflow()
@@ -82,13 +80,16 @@ class VM:
 
     def __call(self, count: int) -> None:
         self.__check_stack_underflow()
-        name = self.__pop()
-        self.__load_function(name, count)
+        if len(self.stack) < count:
+            raise Fault(FaultType.STACK_UNDERFLOW)
+        if self.stack[-count-1].value_type != lookup.FUNCTION:
+            raise Fault(FaultType.OUT_OF_ORDER)
+        self.__load_function(count)
 
     def __ret(self, _) -> None:
         frame = self.__get_current_frame()
         return_value = self.__pop()
-        self.stack = self.stack[:frame.base_pointer]
+        self.stack = self.stack[:frame.base_pointer - 1]
         self.stack.append(return_value)
         self.frames.pop()
 

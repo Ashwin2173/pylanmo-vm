@@ -3,6 +3,7 @@
 INTEGER = 1
 STRING = 2
 IDENTIFIER = 3
+FUNCTION = 4
 
 OP_PUSH = 1
 OP_POP = 2
@@ -19,5 +20,8 @@ class FaultType(Enum):
     NO_FRAME = auto()
     TYPE_ERROR = auto()
     UNDEFINED_FUNCTION = auto()
+
+    OUT_OF_ORDER = auto()
+    NO_RET = auto()
 
     DONE = auto()

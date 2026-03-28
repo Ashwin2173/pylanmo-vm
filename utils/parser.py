@@ -7,15 +7,17 @@ class Value:
         self.value_type = value_type
         self.value = value
 
+    def __repr__(self):
+        return f"<{self.value_type}: {self.value}>"
+
 class OpCode:
     def __init__(self, op_code: int, data: int):
         self.op_code = op_code
         self.data = data
 
 class Function:
-    def __init__(self, name: str, arg_count: int, body: list[OpCode]):
+    def __init__(self, name: str, body: list[OpCode]):
         self.name = name
-        self.arg_count = arg_count
         self.body = body
 
 class Parser:
@@ -43,6 +45,10 @@ class Parser:
                 size = self.bd.next_int(4)
                 identifier = self.bd.next_str(size)
                 self.symbol_table.append(Value(lookup.IDENTIFIER, identifier))
+            elif symbol_format == lookup.FUNCTION:
+                size = self.bd.next_int(4)
+                function_name = self.bd.next_str(size)
+                self.symbol_table.append(Value(lookup.FUNCTION, function_name))
             else:
                 assert False, f"Unhandled DataType: { str(symbol_format) }"
 
@@ -50,14 +56,11 @@ class Parser:
         function_count = self.bd.next_int(2)
         for _ in range(function_count):
             function_name = self.symbol_table[self.bd.next_int(2)]
-            function_args = self.bd.next_int(1)
             _ = self.bd.next_int(4)
             _ = self.bd.next_int(2)
             function_body = self.__read_function_body()
-            function_lookup_name = f"{function_name.value}[{function_args}]"
-            self.function_table[function_lookup_name] = Function(
+            self.function_table[function_name.value] = Function(
                 name = function_name.value,
-                arg_count = function_args,
                 body = function_body
             )
 

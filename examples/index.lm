@@ -1,30 +1,25 @@
-main 0 {
-    PUSH "Hello"
-    PEEK
-    PUSH main
-    CALL 0
-    RET
-}
-
-x 0 {
-    PUSH 1
-    ADD
-    PEEK
-    PUSH x
-    CALL 0
-    RET
-}
-
-mainx 1 {
-    PUSH "Hello, World"
-    PUSH print
-    PEEK
+main {
+    PUSH print_ashwin
+    PUSH "NONE"
     CALL 1
+    PUSH 0
     RET
 }
 
-print 1 {
+print_ashwin {
+    PEEK
+    POP
+    PUSH print
+    PUSH "Ashwin"
+    CALL 1
+    PUSH 0
+    RET
+}
+
+print {
     PEEK
     PUSH 0
     RET
 }
+
+
