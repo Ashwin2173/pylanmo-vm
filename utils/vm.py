@@ -12,13 +12,16 @@ class VM:
         self.stack: list[Value] = list()
         self.frames: list[Frame] = list()
         self.globals: dict[str, Value] = dict()
-        self.op_code_lookup = {
+        self.op_code_lookup: dict[int, callable] = {
             lookup.OP_PUSH: self.__push,
             lookup.OP_POP: self.__pop,
-            lookup.OP_ADD: self.__add,
+            lookup.OP_BIN: self.__bin_op,
             lookup.OP_PEEK: self.__peek,
             lookup.OP_CALL: self.__call,
             lookup.OP_RET: self.__ret
+        }
+        self.op_bin_op_lookup = {
+            lookup.BIN_OP_ADD: self.__add
         }
 
     def step_in(self):
@@ -60,7 +63,12 @@ class VM:
         self.__check_stack_underflow()
         return self.stack.pop()
 
-    def __add(self, _) -> None:
+    def __bin_op(self, operation_value: int) -> None:
+        if operation_value not in self.op_bin_op_lookup:
+            raise Fault(FaultType.INVALID_BIN_OP)
+        self.op_bin_op_lookup[operation_value]()
+
+    def __add(self, _=None) -> None:
         right: Value = self.__pop()
         left: Value = self.__pop()
         if left.value_type == lookup.STRING or right.value_type == lookup.STRING:
@@ -70,7 +78,7 @@ class VM:
         else:
             raise Fault(FaultType.TYPE_ERROR)
 
-    def __peek(self, _) -> None:
+    def __peek(self, _=None) -> None:
         self.__check_stack_underflow()
         peek = self.stack[-1]
         if peek.value_type in {lookup.INTEGER, lookup.STRING}:
@@ -86,7 +94,7 @@ class VM:
             raise Fault(FaultType.OUT_OF_ORDER)
         self.__load_function(count)
 
-    def __ret(self, _) -> None:
+    def __ret(self, _=None) -> None:
         frame = self.__get_current_frame()
         return_value = self.__pop()
         self.stack = self.stack[:frame.base_pointer - 1]

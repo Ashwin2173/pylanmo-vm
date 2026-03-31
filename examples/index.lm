@@ -1,25 +1,9 @@
 main {
-    PUSH print_ashwin
-    PUSH "NONE"
-    CALL 1
-    PUSH 0
-    RET
-}
-
-print_ashwin {
+    PUSH   1
+    PUSH   2
+    BIN_OP 2
     PEEK
     POP
-    PUSH print
-    PUSH "Ashwin"
-    CALL 1
-    PUSH 0
+    PUSH   1
     RET
 }
-
-print {
-    PEEK
-    PUSH 0
-    RET
-}
-
-

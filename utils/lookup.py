@@ -7,11 +7,13 @@ FUNCTION = 4
 
 OP_PUSH = 1
 OP_POP = 2
-OP_ADD = 3
+OP_BIN = 3
 OP_PEEK = 4
 OP_CALL = 5
 OP_HALT = 6
 OP_RET = 7
+
+BIN_OP_ADD = 1
 
 from enum import Enum, auto
 
@@ -20,6 +22,7 @@ class FaultType(Enum):
     NO_FRAME = auto()
     TYPE_ERROR = auto()
     UNDEFINED_FUNCTION = auto()
+    INVALID_BIN_OP = auto()
 
     OUT_OF_ORDER = auto()
     NO_RET = auto()
