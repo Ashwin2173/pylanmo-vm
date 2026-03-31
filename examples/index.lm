@@ -1,9 +1,15 @@
 main {
+    PUSH add
     PUSH   1
     PUSH   2
-    BIN_OP 2
+    CALL   2
     PEEK
     POP
     PUSH   1
+    RET
+}
+
+add {
+    BIN_OP 1
     RET
 }

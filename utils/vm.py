@@ -37,16 +37,17 @@ class VM:
         frame.ip += 1
 
     def load_main(self):
-        self.stack.append(Value(lookup.FUNCTION, "main"))
+        if "main" not in self.function_table:
+            raise Fault(FaultType.UNDEFINED_FUNCTION)
+        self.stack.append(Value(lookup.FUNCTION, self.function_table["main"]))
         self.__load_function(0)
 
     def __load_function(self, args: int) -> None:
-        name = self.stack[-args - 1]
-        func: Function = self.function_table.get(name.value)
-        if func is None:
-            raise Fault(FaultType.UNDEFINED_FUNCTION)
+        func_value: Value = self.stack[-args - 1]
+        if func_value.value_type != lookup.FUNCTION:
+            raise Fault(FaultType.TYPE_ERROR)
         self.frames.append(Frame(
-            func = func,
+            func = func_value.value,
             base_pointer = len(self.stack) - args
         ))
 
@@ -57,6 +58,10 @@ class VM:
 
     def __push(self, value: int) -> None:
         value: Value = self.symbol_table[value]
+        if value.value_type == lookup.FUNCTION:
+            if value.value not in self.function_table:
+                raise Fault(FaultType.UNDEFINED_FUNCTION)
+            value: Value = Value(lookup.FUNCTION, self.function_table[value.value])
         self.stack.append(value)
 
     def __pop(self, _=None) -> Value:
@@ -88,7 +93,7 @@ class VM:
 
     def __call(self, count: int) -> None:
         self.__check_stack_underflow()
-        if len(self.stack) < count:
+        if len(self.stack) < count + 1:
             raise Fault(FaultType.STACK_UNDERFLOW)
         if self.stack[-count-1].value_type != lookup.FUNCTION:
             raise Fault(FaultType.OUT_OF_ORDER)

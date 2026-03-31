@@ -20,6 +20,9 @@ class Function:
         self.name = name
         self.body = body
 
+    def __repr__(self):
+        return f"<function: {self.name}>"
+
 class Parser:
     def __init__(self, bd: ByteDispenser):
         self.bd = bd
