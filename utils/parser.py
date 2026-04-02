@@ -52,6 +52,11 @@ class Parser:
                 size = self.bd.next_int(4)
                 function_name = self.bd.next_str(size)
                 self.symbol_table.append(Value(lookup.FUNCTION, function_name))
+            elif symbol_format == lookup.NONE:
+                self.symbol_table.append(Value(lookup.NONE, None))
+            elif symbol_format == lookup.BOOLEAN:
+                value = self.bd.next_int(1)
+                self.symbol_table.append(Value(lookup.BOOLEAN, value))
             else:
                 assert False, f"Unhandled DataType: { str(symbol_format) }"
 

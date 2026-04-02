@@ -86,8 +86,14 @@ class VM:
     def __peek(self, _=None) -> None:
         self.__check_stack_underflow()
         peek = self.stack[-1]
-        if peek.value_type in {lookup.INTEGER, lookup.STRING}:
-            print(peek.value)
+        wrapper_value = {
+            lookup.INTEGER: peek.value,
+            lookup.STRING: peek.value,
+            lookup.NONE: "NONE",
+            lookup.BOOLEAN: "TRUE" if peek.value == 1 else "FALSE"
+        }
+        if peek.value_type in wrapper_value:
+            print(wrapper_value[peek.value_type])
             return
         print(f"<type({peek.value_type}): {peek.value}>")
 
