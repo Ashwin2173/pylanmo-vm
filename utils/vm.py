@@ -14,14 +14,29 @@ class VM:
         self.globals: dict[str, Value] = dict()
         self.op_code_lookup: dict[int, callable] = {
             lookup.OP_PUSH: self.__push,
-            lookup.OP_POP: self.__pop,
-            lookup.OP_BIN: self.__bin_op,
+            lookup.OP_POP:  self.__pop,
+            lookup.OP_BIN:  self.__bin_op,
             lookup.OP_PEEK: self.__peek,
             lookup.OP_CALL: self.__call,
-            lookup.OP_RET: self.__ret
+            lookup.OP_RET:  self.__ret
         }
-        self.op_bin_op_lookup = {
-            lookup.BIN_OP_ADD: self.__add
+        self.op_bin_int = {
+            lookup.BIN_OP_ADD: lambda x, y: y + x,
+            lookup.BIN_OP_SUB: lambda x, y: y - x,
+            lookup.BIN_OP_MUL: lambda x, y: y * x,
+            lookup.BIN_OP_DIV: lambda x, y: y / x,
+            lookup.BIN_OP_MOD: lambda x, y: y % x,
+        }
+        self.op_bin_cmp = {
+            lookup.BIN_OP_EEQ: lambda x, y: y == x,
+            lookup.BIN_OP_NEQ: lambda x, y: y != x,
+            lookup.BIN_OP_GEQ: lambda x, y: y >= x,
+            lookup.BIN_OP_GTN: lambda x, y: y >  x,
+            lookup.BIN_OP_LEQ: lambda x, y: y <= x,
+            lookup.BIN_OP_LTN: lambda x, y: y <  x,
+
+            lookup.BIN_OP_AND: lambda x, y: y and x,
+            lookup.BIN_OP_OR:  lambda x, y: y or  x
         }
 
     def step_in(self):
@@ -69,19 +84,40 @@ class VM:
         return self.stack.pop()
 
     def __bin_op(self, operation_value: int) -> None:
-        if operation_value not in self.op_bin_op_lookup:
+        if operation_value == lookup.BIN_OP_ADD:
+            self.__bin_op_add()
+        elif operation_value in self.op_bin_int:
+            self.__bin_op_int(operation_value)
+        elif operation_value in self.op_bin_cmp:
+            self.__bin_op_cmp(operation_value)
+        else:
             raise Fault(FaultType.INVALID_BIN_OP)
-        self.op_bin_op_lookup[operation_value]()
 
-    def __add(self, _=None) -> None:
+    def __bin_op_add(self) -> None:
         right: Value = self.__pop()
         left: Value = self.__pop()
         if left.value_type == lookup.STRING or right.value_type == lookup.STRING:
-            self.stack.append(Value(lookup.STRING, f"{left.value}{right.value}"))
+            result = f"{left.value}{right.value}"
+            self.stack.append(Value(lookup.STRING, result))
         elif left.value_type == lookup.INTEGER and right.value_type == lookup.INTEGER:
-            self.stack.append(Value(lookup.INTEGER, left.value + right.value))
+            result = self.op_bin_int[lookup.BIN_OP_ADD](left.value, right.value)
+            self.stack.append(Value(lookup.INTEGER, result))
         else:
             raise Fault(FaultType.TYPE_ERROR)
+
+    def __bin_op_int(self, op_value: int) -> None:
+        right: Value = self.__pop()
+        left: Value = self.__pop()
+        if left.value_type != lookup.INTEGER or right.value_type != lookup.INTEGER:
+            raise Fault(FaultType.TYPE_ERROR)
+        result = self.op_bin_int[op_value](left.value, right.value)
+        self.stack.append(Value(lookup.INTEGER, result))
+
+    def __bin_op_cmp(self, op_value: int) -> None:
+        right: Value = self.__pop()
+        left: Value = self.__pop()
+        result = self.op_bin_cmp[op_value](left.value, right.value)
+        self.stack.append(Value(lookup.BOOLEAN, result))
 
     def __peek(self, _=None) -> None:
         self.__check_stack_underflow()

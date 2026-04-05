@@ -1,11 +1,13 @@
 main {
-    PUSH main
+    PUSH "ashwin"
+    PUSH "ashwin"
+    BIN_OP 6
     PEEK
-    PUSH NONE
+    PUSH 1
+    PUSH 2
+    BIN_OP 6
     PEEK
-    PUSH TRUE
-    PEEK
-    PUSH FALSE
+    BIN_OP 12
     PEEK
     PUSH 1
     RET
