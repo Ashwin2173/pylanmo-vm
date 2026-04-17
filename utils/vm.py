@@ -18,7 +18,8 @@ class VM:
             lookup.OP_BIN:  self.__bin_op,
             lookup.OP_PEEK: self.__peek,
             lookup.OP_CALL: self.__call,
-            lookup.OP_RET:  self.__ret
+            lookup.OP_RET:  self.__ret,
+            lookup.OP_JUMP: self.__jump,
         }
         self.op_bin_int = {
             lookup.BIN_OP_ADD: lambda x, y: y + x,
@@ -147,6 +148,10 @@ class VM:
         self.stack = self.stack[:frame.base_pointer - 1]
         self.stack.append(return_value)
         self.frames.pop()
+
+    def __jump(self, instruction_pointer: int) -> None:
+        frame = self.__get_current_frame()
+        frame.ip = instruction_pointer - 1
 
     def __check_stack_underflow(self):
         frame = self.__get_current_frame()

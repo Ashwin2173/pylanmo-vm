@@ -1,14 +1,9 @@
 main {
-    PUSH "ashwin"
-    PUSH "ashwin"
-    BIN_OP 6
+    LABEL l1
+    PUSH "Hello, World"
     PEEK
-    PUSH 1
-    PUSH 2
-    BIN_OP 6
-    PEEK
-    BIN_OP 12
-    PEEK
+    POP
+    JUMP l1
     PUSH 1
     RET
 }
