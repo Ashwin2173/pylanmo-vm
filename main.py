@@ -36,10 +36,11 @@ def main(args: list[str]) -> None:
     except Fault as f:
         if f.fault_code != FaultType.DONE:
             func_name = "~"
-            func_line = "~"
+            func_ip = "~"
             if len(vm.frames) > 0:
                 func_name = vm.frames[-1].func.name
-            print(f"VM FAULT[{func_name}:{func_line}]: {f.fault_code}")
+                func_ip = vm.frames[-1].ip
+            print(f"VM FAULT[{func_name}:~{func_ip}]: {f.fault_code}")
             sys.exit(1)
         sys.exit(0)
     except Exception as e:

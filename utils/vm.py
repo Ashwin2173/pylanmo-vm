@@ -20,7 +20,8 @@ class VM:
             lookup.OP_CALL: self.__call,
             lookup.OP_RET:  self.__ret,
             lookup.OP_JUMP: self.__jump,
-            lookup.OP_JUMP_IF_FALSE: self.__jump_if_false
+            lookup.OP_JUMP_IF_FALSE: self.__jump_if_false,
+            lookup.OP_DUP: self.__dup
         }
         self.op_bin_int = {
             lookup.BIN_OP_ADD: lambda x, y: y + x,
@@ -161,6 +162,11 @@ class VM:
             raise Fault(FaultType.TYPE_ERROR)
         if value.value == 0:
             frame.ip = instruction_pointer - 1
+
+    def __dup(self, _=None) -> None:
+        value: Value = self.__pop()
+        self.stack.append(value)
+        self.stack.append(value)
 
     def __check_stack_underflow(self):
         frame = self.__get_current_frame()

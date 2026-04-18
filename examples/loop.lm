@@ -1,0 +1,18 @@
+main {
+    PUSH print PUSH "Starting loop..." CALL 1 POP
+    PUSH 1                   // init value
+    LABEL loop_start
+    WRITE
+    PUSH 1 BIN_OP 1          // += 1
+    DUP PUSH 10 BIN_OP 11    // init value >= 10
+    JUMP_IF_FALSE loop_start
+    PUSH print PUSH "Ending loop..." CALL 1 POP
+    PUSH 0
+    RET
+}
+
+print {
+    WRITE POP
+    PUSH NONE
+    RET
+}

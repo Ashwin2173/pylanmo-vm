@@ -1,9 +1,11 @@
 main {
-    PUSH FALSE
-    JUMP_IF_FALSE end
-    PUSH "Ashwin"
-    WRITE
-    LABEL end
-    PUSH 1
+    PUSH print PUSH "Starting loop..." CALL 1
+    PUSH 0
+    RET
+}
+
+print {
+    WRITE POP
+    PUSH NONE
     RET
 }
