@@ -1,9 +1,9 @@
 main {
-    LABEL l1
-    PUSH "Hello, World"
-    PEEK
-    POP
-    JUMP l1
+    PUSH FALSE
+    JUMP_IF_FALSE end
+    PUSH "Ashwin"
+    WRITE
+    LABEL end
     PUSH 1
     RET
 }

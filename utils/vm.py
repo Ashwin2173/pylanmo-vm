@@ -16,10 +16,11 @@ class VM:
             lookup.OP_PUSH: self.__push,
             lookup.OP_POP:  self.__pop,
             lookup.OP_BIN:  self.__bin_op,
-            lookup.OP_PEEK: self.__peek,
+            lookup.OP_WRITE: self.__write,
             lookup.OP_CALL: self.__call,
             lookup.OP_RET:  self.__ret,
             lookup.OP_JUMP: self.__jump,
+            lookup.OP_JUMP_IF_FALSE: self.__jump_if_false
         }
         self.op_bin_int = {
             lookup.BIN_OP_ADD: lambda x, y: y + x,
@@ -120,7 +121,7 @@ class VM:
         result = self.op_bin_cmp[op_value](left.value, right.value)
         self.stack.append(Value(lookup.BOOLEAN, result))
 
-    def __peek(self, _=None) -> None:
+    def __write(self, _=None) -> None:
         self.__check_stack_underflow()
         peek = self.stack[-1]
         wrapper_value = {
@@ -152,6 +153,14 @@ class VM:
     def __jump(self, instruction_pointer: int) -> None:
         frame = self.__get_current_frame()
         frame.ip = instruction_pointer - 1
+
+    def __jump_if_false(self, instruction_pointer: int) -> None:
+        frame = self.__get_current_frame()
+        value: Value = self.__pop()
+        if value.value_type != lookup.BOOLEAN:
+            raise Fault(FaultType.TYPE_ERROR)
+        if value.value == 0:
+            frame.ip = instruction_pointer - 1
 
     def __check_stack_underflow(self):
         frame = self.__get_current_frame()
