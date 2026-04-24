@@ -1,0 +1,16 @@
+main {
+    PUSH fib PUSH 1 CALL 1 WRITE POP
+    PUSH fib PUSH 2 CALL 1 WRITE POP
+    PUSH fib PUSH 3 CALL 1 WRITE POP
+    PUSH 0 RET
+}
+
+fib {   // fib (x)
+    DUP PUSH 2 BIN_OP 8 JUMP_IF_FALSE end_if1
+        RET
+    LABEL end_if1
+
+    DUP PUSH fib 
+
+    PUSH NONE RET
+}

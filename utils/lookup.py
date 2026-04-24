@@ -17,6 +17,8 @@ OP_RET = 7
 OP_JUMP = 8
 OP_JUMP_IF_FALSE = 9
 OP_DUP = 10
+OP_STORE = 11
+OP_LOAD = 12
 
 BIN_OP_ADD = 1
 BIN_OP_SUB = 2
@@ -44,6 +46,8 @@ class FaultType(Enum):
     INVALID_BIN_OP = auto()
 
     OUT_OF_ORDER = auto()
+    INVALID_LOCAL_SLOT = auto()
+    GC_FAILURE = auto()
     NO_RET = auto()
 
     DONE = auto()

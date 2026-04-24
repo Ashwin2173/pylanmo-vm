@@ -1,0 +1,20 @@
+main {
+    PUSH "Hello, World"
+    STORE hello
+    PUSH print LOAD hello CALL 1
+    PUSH func CALL 0
+    PUSH 1
+    RETURN
+}
+
+func {
+    PUSH "Ashwin"
+    STORE x
+    PUSH print PUSH "Came here..." CALL 1
+    PUSH NONE RETURN
+}
+
+print {
+    WRITE POP
+    PUSH NONE RETURN
+}

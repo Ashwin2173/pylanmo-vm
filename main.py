@@ -33,6 +33,7 @@ def main(args: list[str]) -> None:
         vm.load_main()
         while True:
             vm.step_in()
+            print(vm.memory)
     except Fault as f:
         if f.fault_code != FaultType.DONE:
             func_name = "~"

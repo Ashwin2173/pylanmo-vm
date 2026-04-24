@@ -12,6 +12,7 @@ class VM:
         self.stack: list[Value] = list()
         self.frames: list[Frame] = list()
         self.globals: dict[str, Value] = dict()
+        self.memory: list[Value] = list()
         self.op_code_lookup: dict[int, callable] = {
             lookup.OP_PUSH: self.__push,
             lookup.OP_POP:  self.__pop,
@@ -21,7 +22,9 @@ class VM:
             lookup.OP_RET:  self.__ret,
             lookup.OP_JUMP: self.__jump,
             lookup.OP_JUMP_IF_FALSE: self.__jump_if_false,
-            lookup.OP_DUP: self.__dup
+            lookup.OP_DUP: self.__dup,
+            lookup.OP_STORE: self.__store,
+            lookup.OP_LOAD: self.__load
         }
         self.op_bin_int = {
             lookup.BIN_OP_ADD: lambda x, y: y + x,
@@ -64,10 +67,13 @@ class VM:
         func_value: Value = self.stack[-args - 1]
         if func_value.value_type != lookup.FUNCTION:
             raise Fault(FaultType.TYPE_ERROR)
+        function: Function = func_value.value
         self.frames.append(Frame(
-            func = func_value.value,
-            base_pointer = len(self.stack) - args
+            func = function,
+            base_pointer = len(self.stack) - args,
+            mem_base_pointer = len(self.memory)
         ))
+        self.memory += [None for _ in range(function.local_count)]
 
     def __get_current_frame(self):
         if len(self.frames) == 0:
@@ -145,7 +151,8 @@ class VM:
         self.__load_function(count)
 
     def __ret(self, _=None) -> None:
-        frame = self.__get_current_frame()
+        frame: Frame = self.__get_current_frame()
+        self.__gc(frame.func)
         return_value = self.__pop()
         self.stack = self.stack[:frame.base_pointer - 1]
         self.stack.append(return_value)
@@ -168,13 +175,35 @@ class VM:
         self.stack.append(value)
         self.stack.append(value)
 
+    def __store(self, pointer: int) -> None:
+        frame = self.__get_current_frame()
+        mem_base_pointer = frame.mem_base_pointer
+        if len(self.memory) < mem_base_pointer + pointer:
+            raise Fault(FaultType.INVALID_LOCAL_SLOT)
+        self.memory[mem_base_pointer + pointer] = self.__pop()
+
+    def __load(self, pointer: int) -> None:
+        frame = self.__get_current_frame()
+        mem_base_pointer = frame.mem_base_pointer
+        if len(self.memory) < mem_base_pointer + pointer:
+            raise Fault(FaultType.INVALID_LOCAL_SLOT)
+        self.stack.append(self.memory[mem_base_pointer + pointer])
+
+    def __gc(self, frame: Function) -> None:
+        local_count = frame.local_count
+        if local_count == 0: return
+        if len(self.memory) + local_count < 0:
+            raise Fault(FaultType.GC_FAILURE)
+        self.memory = self.memory[:-frame.local_count]
+
     def __check_stack_underflow(self):
         frame = self.__get_current_frame()
         if len(self.stack) <= frame.base_pointer:
             raise Fault(FaultType.STACK_UNDERFLOW)
 
 class Frame:
-    def __init__(self, func: Function, base_pointer: int):
+    def __init__(self, func: Function, base_pointer: int, mem_base_pointer: int):
         self.func = func
         self.ip = 0
         self.base_pointer = base_pointer
+        self.mem_base_pointer = mem_base_pointer

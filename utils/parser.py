@@ -16,8 +16,9 @@ class OpCode:
         self.data = data
 
 class Function:
-    def __init__(self, name: str, body: list[OpCode]):
+    def __init__(self, name: str, local_count: int, body: list[OpCode]):
         self.name = name
+        self.local_count = local_count
         self.body = body
 
     def __repr__(self):
@@ -64,11 +65,12 @@ class Parser:
         function_count = self.bd.next_int(2)
         for _ in range(function_count):
             function_name = self.symbol_table[self.bd.next_int(2)]
-            _ = self.bd.next_int(4)
+            local_count = self.bd.next_int(4)
             _ = self.bd.next_int(2)
             function_body = self.__read_function_body()
             self.function_table[function_name.value] = Function(
                 name = function_name.value,
+                local_count = local_count,
                 body = function_body
             )
 
