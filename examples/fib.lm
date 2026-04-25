@@ -1,16 +1,22 @@
 main {
-    PUSH fib PUSH 1 CALL 1 WRITE POP
-    PUSH fib PUSH 2 CALL 1 WRITE POP
-    PUSH fib PUSH 3 CALL 1 WRITE POP
-    PUSH 0 RET
+    PUSH 0 STORE count
+    PUSH 0 STORE x1
+    PUSH 1 STORE x2
+    PUSH print LOAD x1 CALL 1 POP
+    LABEL start
+        PUSH print LOAD x2 CALL 1 POP
+        LOAD x1 LOAD x2 BIN_OP 1
+        LOAD x2 STORE x1
+        STORE x2
+
+        PUSH 1 LOAD count BIN_OP 1 STORE count
+        LOAD count PUSH 9 BIN_OP 11
+    JUMP_IF_FALSE start
+
+    PUSH NONE RETURN
 }
 
-fib {   // fib (x)
-    DUP PUSH 2 BIN_OP 8 JUMP_IF_FALSE end_if1
-        RET
-    LABEL end_if1
-
-    DUP PUSH fib 
-
-    PUSH NONE RET
+print {
+    WRITE POP
+    PUSH NONE RETURN
 }

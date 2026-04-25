@@ -178,14 +178,14 @@ class VM:
     def __store(self, pointer: int) -> None:
         frame = self.__get_current_frame()
         mem_base_pointer = frame.mem_base_pointer
-        if len(self.memory) < mem_base_pointer + pointer:
+        if mem_base_pointer + pointer >= len(self.memory):
             raise Fault(FaultType.INVALID_LOCAL_SLOT)
         self.memory[mem_base_pointer + pointer] = self.__pop()
 
     def __load(self, pointer: int) -> None:
         frame = self.__get_current_frame()
         mem_base_pointer = frame.mem_base_pointer
-        if len(self.memory) < mem_base_pointer + pointer:
+        if mem_base_pointer + pointer >= len(self.memory):
             raise Fault(FaultType.INVALID_LOCAL_SLOT)
         self.stack.append(self.memory[mem_base_pointer + pointer])
 
