@@ -68,6 +68,9 @@ class VM:
         if func_value.value_type != lookup.FUNCTION:
             raise Fault(FaultType.TYPE_ERROR)
         function: Function = func_value.value
+        if function.is_native:
+            self.__call_native_function(function, args)
+            return
         self.frames.append(Frame(
             func = function,
             base_pointer = len(self.stack) - args,
@@ -157,6 +160,13 @@ class VM:
         self.stack = self.stack[:frame.base_pointer - 1]
         self.stack.append(return_value)
         self.frames.pop()
+
+    def __call_native_function(self, function: Function, args: int) -> None:
+        args: list[Value] = self.stack[-args:] if args > 0 else list()
+        return_value = function.native_pointer(args)
+        if type(return_value) != Value:
+            raise Fault(FaultType.NATIVE_FUNCTION_RETURN)
+        self.stack.append(return_value)
 
     def __jump(self, instruction_pointer: int) -> None:
         frame = self.__get_current_frame()

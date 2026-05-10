@@ -1,0 +1,13 @@
+NATIVE print
+NATIVE input
+
+main {
+    PUSH input
+    CALL 0
+    STORE x
+    PUSH print
+    LOAD x
+    CALL 1
+    PUSH 0
+    RETURN
+}

@@ -43,6 +43,8 @@ class FaultType(Enum):
     NO_FRAME = auto()
     TYPE_ERROR = auto()
     UNDEFINED_FUNCTION = auto()
+    NATIVE_FUNCTION_ARGS = auto()
+    NATIVE_FUNCTION_RETURN = auto()
     INVALID_BIN_OP = auto()
 
     OUT_OF_ORDER = auto()

@@ -1,3 +1,5 @@
+from typing import Callable
+
 import utils.lookup as lookup
 
 from utils.byte_dispenser import ByteDispenser
@@ -16,13 +18,16 @@ class OpCode:
         self.data = data
 
 class Function:
-    def __init__(self, name: str, local_count: int, body: list[OpCode]):
+    def __init__(self, name: str, local_count: int, body: list[OpCode] | None, native_pointer: Callable | None, is_native: bool):
         self.name = name
         self.local_count = local_count
         self.body = body
+        self.native_pointer = native_pointer
+        self.is_native = is_native
 
     def __repr__(self):
-        return f"<function: {self.name}>"
+        name = "native_function" if self.is_native else "custom_function"
+        return f"<{name}: {self.name}>"
 
 class Parser:
     def __init__(self, bd: ByteDispenser):
@@ -30,8 +35,20 @@ class Parser:
         self.function_table = dict[str, Function]()
         self.symbol_table   = list[Value]()
 
+        self.__load_native_function()
         self.__read_symbols()
         self.__read_functions()
+
+    def __load_native_function(self) -> None:
+        from utils.native_functions import get_all_native
+        for name, func_pointer in get_all_native().items():
+            self.function_table[name] = Function(
+                name='print',
+                local_count=0,
+                body=None,
+                native_pointer=func_pointer,
+                is_native=True
+            )
 
     def __read_symbols(self) -> None:
         symbol_count = self.bd.next_int(2)
@@ -71,7 +88,9 @@ class Parser:
             self.function_table[function_name.value] = Function(
                 name = function_name.value,
                 local_count = local_count,
-                body = function_body
+                body = function_body,
+                native_pointer=None,
+                is_native=False
             )
 
     def __read_function_body(self) -> list[OpCode]:
@@ -82,4 +101,5 @@ class Parser:
             data    = self.bd.next_int(2)
             function_body.append(OpCode(op_code = op_code, data = data))
         return function_body
+
 
