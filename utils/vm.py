@@ -161,8 +161,9 @@ class VM:
         self.stack.append(return_value)
         self.frames.pop()
 
-    def __call_native_function(self, function: Function, args: int) -> None:
-        args: list[Value] = self.stack[-args:] if args > 0 else list()
+    def __call_native_function(self, function: Function, args_count: int) -> None:
+        args: list[Value] = self.stack[-args_count:] if args_count > 0 else list()
+        self.stack = self.stack[:-args_count-1]
         return_value = function.native_pointer(args)
         if type(return_value) != Value:
             raise Fault(FaultType.NATIVE_FUNCTION_RETURN)

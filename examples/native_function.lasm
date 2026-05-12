@@ -1,13 +1,16 @@
 NATIVE print
-NATIVE input
 
 main {
-    PUSH input
-    CALL 0
-    STORE x
     PUSH print
-    LOAD x
+    PUSH "Hello, World"
     CALL 1
+    WRITE
+    POP
+    WRITE
+    POP
+    WRITE
     PUSH 0
     RETURN
 }
+
+func {}
