@@ -1,0 +1,17 @@
+NATIVE print
+
+main {
+    PUSH print
+        PUSH 1
+        PUSH "Hello"
+
+        PUSH 1
+        PUSH 2
+        MAKE_LIST 2
+
+        MAKE_LIST 3
+    CALL 1
+
+    PUSH 0
+    RETURN
+}

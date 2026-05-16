@@ -17,6 +17,7 @@ class VM:
             lookup.OP_PUSH: self.__push,
             lookup.OP_POP:  self.__pop,
             lookup.OP_BIN:  self.__bin_op,
+            lookup.OP_UNARY: self.__unary_op,
             lookup.OP_WRITE: self.__write,
             lookup.OP_CALL: self.__call,
             lookup.OP_RET:  self.__ret,
@@ -24,7 +25,14 @@ class VM:
             lookup.OP_JUMP_IF_FALSE: self.__jump_if_false,
             lookup.OP_DUP: self.__dup,
             lookup.OP_STORE: self.__store,
-            lookup.OP_LOAD: self.__load
+            lookup.OP_LOAD: self.__load,
+            lookup.OP_MAKE_LIST: self.__make_list,
+            lookup.OP_GET_INDEX: self.__get_index,
+            lookup.OP_SET_INDEX: self.__set_index,
+        }
+        self.op_unary = {
+            lookup.UNA_BANG: lambda x: not x,
+            lookup.UNA_MINUS: lambda x: -x
         }
         self.op_bin_int = {
             lookup.BIN_OP_ADD: lambda x, y: y + x,
@@ -105,9 +113,26 @@ class VM:
         else:
             raise Fault(FaultType.INVALID_BIN_OP)
 
+    def __unary_op(self, op_value: int) -> None:
+        right: Value = self.__pop()
+        if op_value == lookup.UNA_MINUS:
+            if right.value_type == lookup.INTEGER:
+                self.stack.append(Value(lookup.INTEGER, -right.value))
+            else:
+                raise Fault(FaultType.TYPE_ERROR)
+        elif op_value == lookup.UNA_BANG:
+            if right.value_type == lookup.BOOLEAN:
+                self.stack.append(Value(lookup.BOOLEAN, not right.value))
+            else:
+                raise Fault(FaultType.TYPE_ERROR)
+        else:
+            raise Fault(FaultType.INVALID_UNA_OP)
+
     def __bin_op_add(self) -> None:
         right: Value = self.__pop()
         left: Value = self.__pop()
+        if left.value_type == lookup.NONE or right.value_type == lookup.NONE:
+            raise Fault(FaultType.NULL_POINTER_EXCEPTION)
         if left.value_type == lookup.STRING or right.value_type == lookup.STRING:
             result = f"{left.value}{right.value}"
             self.stack.append(Value(lookup.STRING, result))
@@ -145,6 +170,42 @@ class VM:
             return
         print(f"<type({peek.value_type}): {peek.value}>")
 
+    def __set_index(self, _=None) -> None:
+        self.__check_stack_underflow(size=1)
+        index: Value = self.stack.pop()
+        if index.value_type != lookup.INTEGER:
+            raise Fault(FaultType.TYPE_ERROR)
+        value: Value = self.stack.pop()
+        list_data = self.stack[-1]
+        if list_data.value_type not in { lookup.LIST, lookup.STRING }:
+            raise Fault(FaultType.TYPE_ERROR)
+        if -len(list_data.value) <= index.value < len(list_data.value):
+            self.stack[-1].value[index.value] = value
+        else:
+            raise Fault(FaultType.INDEX_OUT_OF_BOUND)
+
+    def __get_index(self, _=None) -> None:
+        self.__check_stack_underflow(size=1)
+        index = self.stack.pop()
+        if index.value_type != lookup.INTEGER:
+            raise Fault(FaultType.TYPE_ERROR)
+        list_data = self.stack.pop()
+        if list_data.value_type not in { lookup.LIST, lookup.STRING }:
+            raise Fault(FaultType.TYPE_ERROR)
+        if -len(list_data.value) <= int(index.value) < len(list_data.value):
+            self.stack.append(list_data.value[index.value])
+        else:
+            raise Fault(FaultType.INDEX_OUT_OF_BOUND)
+
+    def __make_list(self, count: int) -> None:
+        self.__check_stack_underflow(size=count-1)
+        items = self.stack[-count::]
+        self.stack = self.stack[:-count]
+        self.stack.append(Value(
+            value_type=lookup.LIST,
+            value=items
+        ))
+
     def __call(self, count: int) -> None:
         self.__check_stack_underflow()
         if len(self.stack) < count + 1:
@@ -163,7 +224,7 @@ class VM:
 
     def __call_native_function(self, function: Function, args_count: int) -> None:
         args: list[Value] = self.stack[-args_count:] if args_count > 0 else list()
-        self.stack = self.stack[:-args_count-1]
+        self.stack = self.stack[:-args_count-1][::-1]
         return_value = function.native_pointer(args)
         if type(return_value) != Value:
             raise Fault(FaultType.NATIVE_FUNCTION_RETURN)
@@ -207,9 +268,9 @@ class VM:
             raise Fault(FaultType.GC_FAILURE)
         self.memory = self.memory[:-frame.local_count]
 
-    def __check_stack_underflow(self):
+    def __check_stack_underflow(self, size: int=0):
         frame = self.__get_current_frame()
-        if len(self.stack) <= frame.base_pointer:
+        if len(self.stack) - size <= frame.base_pointer:
             raise Fault(FaultType.STACK_UNDERFLOW)
 
 class Frame:

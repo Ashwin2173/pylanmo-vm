@@ -6,6 +6,7 @@ IDENTIFIER = 3
 FUNCTION = 4
 NONE = 5
 BOOLEAN = 6
+LIST = 7
 
 OP_PUSH = 1
 OP_POP = 2
@@ -19,6 +20,13 @@ OP_JUMP_IF_FALSE = 9
 OP_DUP = 10
 OP_STORE = 11
 OP_LOAD = 12
+OP_MAKE_LIST = 13
+OP_GET_INDEX = 14
+OP_SET_INDEX = 15
+OP_UNARY = 16
+
+UNA_MINUS = 1
+UNA_BANG = 2
 
 BIN_OP_ADD = 1
 BIN_OP_SUB = 2
@@ -42,10 +50,13 @@ class FaultType(Enum):
     STACK_UNDERFLOW = auto()
     NO_FRAME = auto()
     TYPE_ERROR = auto()
+    INDEX_OUT_OF_BOUND = auto()
     UNDEFINED_FUNCTION = auto()
     NATIVE_FUNCTION_ARGS = auto()
     NATIVE_FUNCTION_RETURN = auto()
     INVALID_BIN_OP = auto()
+    INVALID_UNA_OP = auto()
+    NULL_POINTER_EXCEPTION = auto()
 
     OUT_OF_ORDER = auto()
     INVALID_LOCAL_SLOT = auto()
