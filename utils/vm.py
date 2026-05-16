@@ -131,6 +131,8 @@ class VM:
     def __bin_op_add(self) -> None:
         right: Value = self.__pop()
         left: Value = self.__pop()
+        if left.value_type == lookup.NONE or right.value_type == lookup.NONE:
+            raise Fault(FaultType.NULL_POINTER_EXCEPTION)
         if left.value_type == lookup.STRING or right.value_type == lookup.STRING:
             result = f"{left.value}{right.value}"
             self.stack.append(Value(lookup.STRING, result))

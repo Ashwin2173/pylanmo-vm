@@ -1,8 +1,11 @@
 NATIVE print
+NATIVE len
 
 main {
     PUSH print
-        PUSH "Hello, World"
+        PUSH "Hello"
+        PUSH NONE
+        BIN_OP 1
     CALL 1
     PUSH NONE
     RETURN

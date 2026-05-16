@@ -56,6 +56,7 @@ class FaultType(Enum):
     NATIVE_FUNCTION_RETURN = auto()
     INVALID_BIN_OP = auto()
     INVALID_UNA_OP = auto()
+    NULL_POINTER_EXCEPTION = auto()
 
     OUT_OF_ORDER = auto()
     INVALID_LOCAL_SLOT = auto()
