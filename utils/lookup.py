@@ -23,6 +23,10 @@ OP_LOAD = 12
 OP_MAKE_LIST = 13
 OP_GET_INDEX = 14
 OP_SET_INDEX = 15
+OP_UNARY = 16
+
+UNA_MINUS = 1
+UNA_BANG = 2
 
 BIN_OP_ADD = 1
 BIN_OP_SUB = 2
@@ -51,6 +55,7 @@ class FaultType(Enum):
     NATIVE_FUNCTION_ARGS = auto()
     NATIVE_FUNCTION_RETURN = auto()
     INVALID_BIN_OP = auto()
+    INVALID_UNA_OP = auto()
 
     OUT_OF_ORDER = auto()
     INVALID_LOCAL_SLOT = auto()

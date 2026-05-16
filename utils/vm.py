@@ -17,6 +17,7 @@ class VM:
             lookup.OP_PUSH: self.__push,
             lookup.OP_POP:  self.__pop,
             lookup.OP_BIN:  self.__bin_op,
+            lookup.OP_UNARY: self.__unary_op,
             lookup.OP_WRITE: self.__write,
             lookup.OP_CALL: self.__call,
             lookup.OP_RET:  self.__ret,
@@ -28,6 +29,10 @@ class VM:
             lookup.OP_MAKE_LIST: self.__make_list,
             lookup.OP_GET_INDEX: self.__get_index,
             lookup.OP_SET_INDEX: self.__set_index,
+        }
+        self.op_unary = {
+            lookup.UNA_BANG: lambda x: not x,
+            lookup.UNA_MINUS: lambda x: -x
         }
         self.op_bin_int = {
             lookup.BIN_OP_ADD: lambda x, y: y + x,
@@ -107,6 +112,21 @@ class VM:
             self.__bin_op_cmp(operation_value)
         else:
             raise Fault(FaultType.INVALID_BIN_OP)
+
+    def __unary_op(self, op_value: int) -> None:
+        right: Value = self.__pop()
+        if op_value == lookup.UNA_MINUS:
+            if right.value_type == lookup.INTEGER:
+                self.stack.append(Value(lookup.INTEGER, -right.value))
+            else:
+                raise Fault(FaultType.TYPE_ERROR)
+        elif op_value == lookup.UNA_BANG:
+            if right.value_type == lookup.BOOLEAN:
+                self.stack.append(Value(lookup.BOOLEAN, not right.value))
+            else:
+                raise Fault(FaultType.TYPE_ERROR)
+        else:
+            raise Fault(FaultType.INVALID_UNA_OP)
 
     def __bin_op_add(self) -> None:
         right: Value = self.__pop()
