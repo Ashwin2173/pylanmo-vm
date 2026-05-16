@@ -8,16 +8,7 @@ def native_print(args: list[Value]) -> Value:
         raise Fault(lookup.FaultType.NATIVE_FUNCTION_ARGS)
     for index, value in enumerate(args):
         end_value = ' ' if index < len(args) - 1 else None
-        wrapper_value = {
-            lookup.INTEGER: value.value,
-            lookup.STRING: value.value,
-            lookup.NONE: "null",
-            lookup.BOOLEAN: "true" if value.value == 1 else "false"
-        }
-        if value.value_type in wrapper_value:
-            print(wrapper_value[value.value_type], end=end_value)
-        else:
-            print(f"<type({value.value_type}): {value.value}>", end=end_value)
+        print(wrapper_value(value), end=end_value)
     return Value(
         value_type=lookup.NONE,
         value=None
@@ -42,6 +33,22 @@ def native_len(args: list[Value]) -> Value:
         value_type=lookup.INTEGER,
         value=len(args[0].value)
     )
+
+def wrapper_value(value: Value) -> any:
+    wrapper_lookup = {
+        lookup.INTEGER: value.value,
+        lookup.STRING: value.value,
+        lookup.NONE: "null",
+        lookup.BOOLEAN: "true" if value.value == 1 else "false",
+    }
+    if value.value_type == lookup.LIST:
+        list_data = [wrapper_value(item) for item in value.value]
+        return list_data
+    elif value.value_type in wrapper_lookup:
+        return wrapper_lookup[value.value_type]
+    else:
+        return f"<type({value.value_type}): {value.value}>"
+
 
 def get_all_native() -> dict:
     return {

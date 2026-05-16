@@ -1,12 +1,17 @@
 NATIVE print
-NATIVE len
 
 main {
     PUSH print
+        PUSH 1
         PUSH "Hello"
-        PUSH NONE
-        BIN_OP 1
+
+        PUSH 1
+        PUSH 2
+        MAKE_LIST 2
+
+        MAKE_LIST 3
     CALL 1
-    PUSH NONE
+
+    PUSH 0
     RETURN
 }

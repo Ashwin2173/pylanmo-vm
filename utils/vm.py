@@ -170,24 +170,30 @@ class VM:
             return
         print(f"<type({peek.value_type}): {peek.value}>")
 
-    def __set_index(self, index: int) -> None:
-        self.__check_stack_underflow()
+    def __set_index(self, _=None) -> None:
+        self.__check_stack_underflow(size=1)
+        index: Value = self.stack.pop()
+        if index.value_type != lookup.INTEGER:
+            raise Fault(FaultType.TYPE_ERROR)
         value: Value = self.stack.pop()
         list_data = self.stack[-1]
         if list_data.value_type not in { lookup.LIST, lookup.STRING }:
             raise Fault(FaultType.TYPE_ERROR)
-        if -len(list_data.value) <= index < len(list_data.value):
-            self.stack[-1].value[index] = value
+        if -len(list_data.value) <= index.value < len(list_data.value):
+            self.stack[-1].value[index.value] = value
         else:
             raise Fault(FaultType.INDEX_OUT_OF_BOUND)
 
-    def __get_index(self, index: int) -> None:
-        self.__check_stack_underflow()
+    def __get_index(self, _=None) -> None:
+        self.__check_stack_underflow(size=1)
+        index = self.stack.pop()
+        if index.value_type != lookup.INTEGER:
+            raise Fault(FaultType.TYPE_ERROR)
         list_data = self.stack.pop()
         if list_data.value_type not in { lookup.LIST, lookup.STRING }:
             raise Fault(FaultType.TYPE_ERROR)
-        if -len(list_data.value) <= index < len(list_data.value):
-            self.stack.append(list_data.value[index])
+        if -len(list_data.value) <= int(index.value) < len(list_data.value):
+            self.stack.append(list_data.value[index.value])
         else:
             raise Fault(FaultType.INDEX_OUT_OF_BOUND)
 
