@@ -1,14 +1,12 @@
 NATIVE print
-NATIVE len
 
 main {
     PUSH print
-    PUSH len
     PUSH 3
     PUSH 2
     PUSH 1
-    MAKE_LIST 3
-    CALL 1
+    MAKE_LIST 3    // [3, 2, 1]
+    GET_INDEX -3
     CALL 1
     PUSH NONE
     RETURN

@@ -21,6 +21,8 @@ OP_DUP = 10
 OP_STORE = 11
 OP_LOAD = 12
 OP_MAKE_LIST = 13
+OP_GET_INDEX = 14
+OP_SET_INDEX = 15
 
 BIN_OP_ADD = 1
 BIN_OP_SUB = 2
@@ -44,6 +46,7 @@ class FaultType(Enum):
     STACK_UNDERFLOW = auto()
     NO_FRAME = auto()
     TYPE_ERROR = auto()
+    INDEX_OUT_OF_BOUND = auto()
     UNDEFINED_FUNCTION = auto()
     NATIVE_FUNCTION_ARGS = auto()
     NATIVE_FUNCTION_RETURN = auto()

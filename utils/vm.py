@@ -25,7 +25,9 @@ class VM:
             lookup.OP_DUP: self.__dup,
             lookup.OP_STORE: self.__store,
             lookup.OP_LOAD: self.__load,
-            lookup.OP_MAKE_LIST: self.__make_list
+            lookup.OP_MAKE_LIST: self.__make_list,
+            lookup.OP_GET_INDEX: self.__get_index,
+            # lookup.OP_SET_INDEX: self.__set_index,
         }
         self.op_bin_int = {
             lookup.BIN_OP_ADD: lambda x, y: y + x,
@@ -146,10 +148,20 @@ class VM:
             return
         print(f"<type({peek.value_type}): {peek.value}>")
 
+    def __get_index(self, index: int) -> None:
+        self.__check_stack_underflow()
+        list_data = self.stack.pop()
+        if list_data.value_type != lookup.LIST:
+            raise Fault(FaultType.TYPE_ERROR)
+        if -len(list_data.value) <= index < len(list_data.value):
+            self.stack.append(list_data.value[index])
+        else:
+            raise Fault(FaultType.INDEX_OUT_OF_BOUND)
+
     def __make_list(self, count: int) -> None:
         self.__check_stack_underflow(size=count-1)
-        self.stack = self.stack[:-count]
         items = self.stack[-count::]
+        self.stack = self.stack[:-count]
         self.stack.append(Value(
             value_type=lookup.LIST,
             value=items
