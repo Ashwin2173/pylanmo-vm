@@ -32,8 +32,20 @@ def native_input(args: list[Value]) -> Value:
         value=inp
     )
 
+def native_len(args: list[Value]) -> Value:
+    if len(args) != 1:
+        raise Fault(lookup.FaultType.NATIVE_FUNCTION_ARGS)
+    value: Value = args[0]
+    if value.value_type not in {lookup.LIST, lookup.STRING}:
+        raise Fault(lookup.FaultType.TYPE_ERROR)
+    return Value(
+        value_type=lookup.INTEGER,
+        value=len(args[0].value)
+    )
+
 def get_all_native() -> dict:
     return {
         "print": native_print,
-        "input": native_input
+        "input": native_input,
+        "len": native_len
     }

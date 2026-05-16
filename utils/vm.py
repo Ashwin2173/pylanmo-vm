@@ -24,7 +24,8 @@ class VM:
             lookup.OP_JUMP_IF_FALSE: self.__jump_if_false,
             lookup.OP_DUP: self.__dup,
             lookup.OP_STORE: self.__store,
-            lookup.OP_LOAD: self.__load
+            lookup.OP_LOAD: self.__load,
+            lookup.OP_MAKE_LIST: self.__make_list
         }
         self.op_bin_int = {
             lookup.BIN_OP_ADD: lambda x, y: y + x,
@@ -145,6 +146,15 @@ class VM:
             return
         print(f"<type({peek.value_type}): {peek.value}>")
 
+    def __make_list(self, count: int) -> None:
+        self.__check_stack_underflow(size=count-1)
+        self.stack = self.stack[:-count]
+        items = self.stack[-count::]
+        self.stack.append(Value(
+            value_type=lookup.LIST,
+            value=items
+        ))
+
     def __call(self, count: int) -> None:
         self.__check_stack_underflow()
         if len(self.stack) < count + 1:
@@ -163,7 +173,7 @@ class VM:
 
     def __call_native_function(self, function: Function, args_count: int) -> None:
         args: list[Value] = self.stack[-args_count:] if args_count > 0 else list()
-        self.stack = self.stack[:-args_count-1]
+        self.stack = self.stack[:-args_count-1][::-1]
         return_value = function.native_pointer(args)
         if type(return_value) != Value:
             raise Fault(FaultType.NATIVE_FUNCTION_RETURN)
@@ -207,9 +217,9 @@ class VM:
             raise Fault(FaultType.GC_FAILURE)
         self.memory = self.memory[:-frame.local_count]
 
-    def __check_stack_underflow(self):
+    def __check_stack_underflow(self, size: int=0):
         frame = self.__get_current_frame()
-        if len(self.stack) <= frame.base_pointer:
+        if len(self.stack) - size <= frame.base_pointer:
             raise Fault(FaultType.STACK_UNDERFLOW)
 
 class Frame:
