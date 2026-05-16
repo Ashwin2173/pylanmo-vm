@@ -1,12 +1,19 @@
 NATIVE print
 
 main {
-    PUSH print
     PUSH 3
     PUSH 2
     PUSH 1
     MAKE_LIST 3    // [3, 2, 1]
-    GET_INDEX -3
+    STORE list
+
+    LOAD list
+    PUSH 100
+    SET_INDEX 0
+    STORE list
+
+    PUSH print
+    LOAD list
     CALL 1
     PUSH NONE
     RETURN
