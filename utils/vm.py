@@ -77,9 +77,7 @@ class VM:
             raise Fault(FaultType.TYPE_ERROR)
         function: Function = func_value.value
         if function.is_native:
-            print(self.stack)
             self.__call_native_function(function, args)
-            print(self.stack)
             return
         self.frames.append(Frame(
             func = function,
