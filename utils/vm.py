@@ -81,7 +81,7 @@ class VM:
             return
         self.frames.append(Frame(
             func = function,
-            base_pointer = len(self.stack) - args,
+            base_pointer = len(self.stack) - args - 1,
             mem_base_pointer = len(self.memory)
         ))
         self.memory += [None for _ in range(function.local_count)]
@@ -224,7 +224,7 @@ class VM:
 
     def __call_native_function(self, function: Function, args_count: int) -> None:
         args: list[Value] = self.stack[-args_count:] if args_count > 0 else list()
-        self.stack = self.stack[:-args_count-1][::-1]
+        self.stack = self.stack[:-args_count-1]
         return_value = function.native_pointer(args)
         if type(return_value) != Value:
             raise Fault(FaultType.NATIVE_FUNCTION_RETURN)

@@ -43,7 +43,7 @@ class Parser:
         from utils.native_functions import get_all_native
         for name, func_pointer in get_all_native().items():
             self.function_table[name] = Function(
-                name='print',
+                name=name,
                 local_count=0,
                 body=None,
                 native_pointer=func_pointer,
