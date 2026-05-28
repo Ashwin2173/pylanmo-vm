@@ -252,7 +252,8 @@ class VM:
         mem_base_pointer = frame.mem_base_pointer
         if mem_base_pointer + pointer >= len(self.memory):
             raise Fault(FaultType.INVALID_LOCAL_SLOT)
-        self.memory[mem_base_pointer + pointer] = self.__pop()
+        self.__check_stack_underflow()
+        self.memory[mem_base_pointer + pointer] = self.stack[-1]
 
     def __load(self, pointer: int) -> None:
         frame = self.__get_current_frame()
