@@ -271,7 +271,8 @@ class VM:
 
     def __check_stack_underflow(self, size: int=0):
         frame = self.__get_current_frame()
-        if len(self.stack) - size <= frame.base_pointer:
+        usable = len(self.stack) - frame.base_pointer
+        if usable <= size:
             raise Fault(FaultType.STACK_UNDERFLOW)
 
 class Frame:
