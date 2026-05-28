@@ -34,6 +34,25 @@ def native_len(args: list[Value]) -> Value:
         value=len(args[0].value)
     )
 
+def native_int(args: list[Value]) -> Value:
+    if len(args) != 1:
+        raise Fault(lookup.FaultType.NATIVE_FUNCTION_ARGS)
+    value: Value = args[0]
+    return Value(
+        value_type=lookup.INTEGER,
+        value=int(value.value)
+    )
+
+def native_now(args: list[Value]) -> Value:
+    if len(args) != 0:
+        raise Fault(lookup.FaultType.NATIVE_FUNCTION_ARGS)
+    import time
+    return Value(
+        value=time.time_ns(),
+        value_type=lookup.INTEGER
+    )
+
+
 def wrapper_value(value: Value) -> any:
     wrapper_lookup = {
         lookup.INTEGER: value.value,
@@ -54,5 +73,7 @@ def get_all_native() -> dict:
     return {
         "print": native_print,
         "input": native_input,
-        "len": native_len
+        "len": native_len,
+        "int": native_int,
+        "now": native_now
     }
