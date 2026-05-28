@@ -35,22 +35,22 @@ class VM:
             lookup.UNA_MINUS: lambda x: -x
         }
         self.op_bin_int = {
-            lookup.BIN_OP_ADD: lambda x, y: y + x,
-            lookup.BIN_OP_SUB: lambda x, y: y - x,
-            lookup.BIN_OP_MUL: lambda x, y: y * x,
-            lookup.BIN_OP_DIV: lambda x, y: y / x,
-            lookup.BIN_OP_MOD: lambda x, y: y % x,
+            lookup.BIN_OP_ADD: lambda x, y: x + y,
+            lookup.BIN_OP_SUB: lambda x, y: x - y,
+            lookup.BIN_OP_MUL: lambda x, y: x * y,
+            lookup.BIN_OP_DIV: lambda x, y: x / y,
+            lookup.BIN_OP_MOD: lambda x, y: x % y,
         }
         self.op_bin_cmp = {
-            lookup.BIN_OP_EEQ: lambda x, y: y == x,
-            lookup.BIN_OP_NEQ: lambda x, y: y != x,
-            lookup.BIN_OP_GEQ: lambda x, y: y >= x,
-            lookup.BIN_OP_GTN: lambda x, y: y >  x,
-            lookup.BIN_OP_LEQ: lambda x, y: y <= x,
-            lookup.BIN_OP_LTN: lambda x, y: y <  x,
+            lookup.BIN_OP_EEQ: lambda x, y: x == y,
+            lookup.BIN_OP_NEQ: lambda x, y: x != y,
+            lookup.BIN_OP_GEQ: lambda x, y: x >= y,
+            lookup.BIN_OP_GTN: lambda x, y: x >  y,
+            lookup.BIN_OP_LEQ: lambda x, y: x <= y,
+            lookup.BIN_OP_LTN: lambda x, y: x <  y,
 
-            lookup.BIN_OP_AND: lambda x, y: y and x,
-            lookup.BIN_OP_OR:  lambda x, y: y or  x
+            lookup.BIN_OP_AND: lambda x, y: x and y,
+            lookup.BIN_OP_OR:  lambda x, y: x or  y
         }
 
     def step_in(self):
