@@ -189,11 +189,14 @@ class VM:
         index = self.stack.pop()
         if index.value_type != lookup.INTEGER:
             raise Fault(FaultType.TYPE_ERROR)
-        list_data = self.stack.pop()
-        if list_data.value_type not in { lookup.LIST, lookup.STRING }:
-            raise Fault(FaultType.TYPE_ERROR)
-        if -len(list_data.value) <= int(index.value) < len(list_data.value):
-            self.stack.append(list_data.value[index.value])
+        op_value = self.stack.pop()
+        if -len(op_value.value) <= int(index.value) < len(op_value.value):
+            if op_value.value_type == lookup.LIST:
+                self.stack.append(op_value.value[index.value])
+            elif op_value.value_type == lookup.STRING:
+                self.stack.append(Value(lookup.STRING, op_value.value[index.value]))
+            else:
+                raise Fault(FaultType.TYPE_ERROR)
         else:
             raise Fault(FaultType.INDEX_OUT_OF_BOUND)
 
