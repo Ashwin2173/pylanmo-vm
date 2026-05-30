@@ -1,15 +1,22 @@
-main {
-    PUSH add
-    PUSH   1
-    PUSH   2
-    CALL   2
-    PEEK
-    POP
-    PUSH   1
-    RET
-}
+NATIVE print
 
-add {
-    BIN_OP 1
-    RET
+main {
+    PUSH 1
+    PUSH 2
+    PUSH 3
+    MAKE_LIST 3
+    STORE list
+
+    LOAD list
+    PUSH "Ashwin"
+    PUSH 0
+    SET_INDEX
+
+    PUSH print
+    LOAD list
+    CALL 1
+    POP
+
+	PUSH NONE
+	RETURN
 }

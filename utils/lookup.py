@@ -58,8 +58,8 @@ class FaultType(Enum):
     INVALID_UNA_OP = auto()
     NULL_POINTER_EXCEPTION = auto()
 
-    OUT_OF_ORDER = auto()
     INVALID_LOCAL_SLOT = auto()
+    INVALID_ARGUMENT_COUNT = auto()
     GC_FAILURE = auto()
     NO_RET = auto()
 

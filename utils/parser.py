@@ -18,8 +18,9 @@ class OpCode:
         self.data = data
 
 class Function:
-    def __init__(self, name: str, local_count: int, body: list[OpCode] | None, native_pointer: Callable | None, is_native: bool):
+    def __init__(self, name: str, args_count: int, local_count: int, body: list[OpCode] | None, native_pointer: Callable | None, is_native: bool):
         self.name = name
+        self.args_count = args_count
         self.local_count = local_count
         self.body = body
         self.native_pointer = native_pointer
@@ -44,6 +45,7 @@ class Parser:
         for name, func_pointer in get_all_native().items():
             self.function_table[name] = Function(
                 name=name,
+                args_count=-1,
                 local_count=0,
                 body=None,
                 native_pointer=func_pointer,
@@ -82,11 +84,13 @@ class Parser:
         function_count = self.bd.next_int(2)
         for _ in range(function_count):
             function_name = self.symbol_table[self.bd.next_int(2)]
+            args_count = self.bd.next_int(1)
             local_count = self.bd.next_int(4)
             _ = self.bd.next_int(2)
             function_body = self.__read_function_body()
             self.function_table[function_name.value] = Function(
                 name = function_name.value,
+                args_count=args_count,
                 local_count = local_count,
                 body = function_body,
                 native_pointer=None,
