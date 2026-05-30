@@ -177,7 +177,7 @@ class VM:
             raise Fault(FaultType.TYPE_ERROR)
         value: Value = self.stack.pop()
         list_data = self.stack[-1]
-        if list_data.value_type not in { lookup.LIST, lookup.STRING }:
+        if list_data.value_type not in { lookup.LIST }:
             raise Fault(FaultType.TYPE_ERROR)
         if -len(list_data.value) <= index.value < len(list_data.value):
             self.stack[-1].value[index.value] = value
@@ -201,9 +201,11 @@ class VM:
             raise Fault(FaultType.INDEX_OUT_OF_BOUND)
 
     def __make_list(self, count: int) -> None:
-        self.__check_stack_underflow(size=count-1)
-        items = self.stack[-count::]
-        self.stack = self.stack[:-count]
+        items = list()
+        if count != 0:
+            self.__check_stack_underflow(size=count-1)
+            items = self.stack[-count::]
+            self.stack = self.stack[:-count]
         self.stack.append(Value(
             value_type=lookup.LIST,
             value=items
