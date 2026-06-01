@@ -1,17 +1,21 @@
 NATIVE print
+NATIVE input
 
 main {
-    PUSH print
-        PUSH 1
-        PUSH "Hello"
+	PUSH print
+        PUSH len
+            PUSH hello
+            CALL 0
+        CALL 1
+	CALL 1
+	PUSH 0
+	RETURN
+}
 
-        PUSH 1
-        PUSH 2
-        MAKE_LIST 2
-
-        MAKE_LIST 3
-    CALL 1
-
-    PUSH 0
-    RETURN
+hello {
+	PUSH print
+	PUSH "Hello, World"
+	CALL 1
+	PUSH "hello"
+	RETURN
 }

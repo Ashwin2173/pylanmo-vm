@@ -79,6 +79,8 @@ class VM:
         if function.is_native:
             self.__call_native_function(function, args)
             return
+        if args != function.args_count:
+            raise Fault(FaultType.INVALID_ARGUMENT_COUNT)
         self.frames.append(Frame(
             func = function,
             base_pointer = len(self.stack) - args,
@@ -216,7 +218,7 @@ class VM:
         if len(self.stack) < count + 1:
             raise Fault(FaultType.STACK_UNDERFLOW)
         if self.stack[-count-1].value_type != lookup.FUNCTION:
-            raise Fault(FaultType.OUT_OF_ORDER)
+            raise Fault(FaultType.TYPE_ERROR)
         self.__load_function(count)
 
     def __ret(self, _=None) -> None:
