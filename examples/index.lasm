@@ -1,6 +1,6 @@
 NATIVE print
 
-main {
+main 0 {
     PUSH 1
     PUSH 2
     PUSH 3

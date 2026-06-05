@@ -28,7 +28,7 @@ def main(args: list[str]) -> None:
     if major_version != MAJOR_VERSION or minor_version != MINOR_VERSION:
         fault(f"Version v{major_version}.{minor_version} is not supported")
     parser = Parser(bd)
-    vm = VM(parser.symbol_table, parser.function_table)
+    vm = VM(parser.symbol_table, parser.struct_table, parser.function_table)
     try:
         vm.load_main()
         while True:

@@ -5,9 +5,10 @@ import utils.lookup as lookup
 from utils.byte_dispenser import ByteDispenser
 
 class Value:
-    def __init__(self, value_type: int, value: any):
+    def __init__(self, value_type: int, value: any, struct_id: int=None):
         self.value_type = value_type
         self.value = value
+        self.struct_id = struct_id
 
     def __repr__(self):
         return f"<{self.value_type}: {self.value}>"
@@ -34,10 +35,12 @@ class Parser:
     def __init__(self, bd: ByteDispenser):
         self.bd = bd
         self.function_table = dict[str, Function]()
+        self.struct_table   = list()
         self.symbol_table   = list[Value]()
 
         self.__load_native_function()
         self.__read_symbols()
+        self.__read_struct()
         self.__read_functions()
 
     def __load_native_function(self) -> None:
@@ -79,6 +82,16 @@ class Parser:
                 self.symbol_table.append(Value(lookup.BOOLEAN, value))
             else:
                 assert False, f"Unhandled DataType: { str(symbol_format) }"
+
+    def __read_struct(self) -> None:
+        struct_count = self.bd.next_int(2)
+        for _ in range(struct_count):
+            member_count = self.bd.next_int(1)
+            members = dict()
+            for index in range(member_count):
+                raw_member = self.symbol_table[self.bd.next_int(2)]
+                members[raw_member] = index
+            self.struct_table.append(members)
 
     def __read_functions(self) -> None:
         function_count = self.bd.next_int(2)
