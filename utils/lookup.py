@@ -26,6 +26,8 @@ OP_GET_INDEX = 14
 OP_SET_INDEX = 15
 OP_UNARY = 16
 OP_NEW_OBJ = 17
+OP_GET_FIELD = 18
+OP_SET_FIELD = 19
 
 UNA_MINUS = 1
 UNA_BANG = 2
@@ -59,6 +61,7 @@ class FaultType(Enum):
     INVALID_BIN_OP = auto()
     INVALID_UNA_OP = auto()
     NULL_POINTER_EXCEPTION = auto()
+    NO_FIELD_IN_OBJECT = auto()
 
     INVALID_LOCAL_SLOT = auto()
     INVALID_ARGUMENT_COUNT = auto()

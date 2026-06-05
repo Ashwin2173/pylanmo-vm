@@ -33,6 +33,8 @@ class VM:
             lookup.OP_GET_INDEX:     self.__get_index,
             lookup.OP_SET_INDEX:     self.__set_index,
             lookup.OP_NEW_OBJ:       self.__new_obj,
+            lookup.OP_GET_FIELD:     self.__get_field,
+            lookup.OP_SET_FIELD:     self.__set_field
         }
         self.op_unary = {
             lookup.UNA_BANG: lambda x: not x,
@@ -181,6 +183,31 @@ class VM:
         values = [Value(lookup.NONE, None) for _ in range(len(struct))]
         struct_value: Value = Value(lookup.OBJECT, values, struct_id)
         self.stack.append(struct_value)
+
+    def __set_field(self, field_index=None) -> None:
+        self.__check_stack_underflow(1)
+        value: Value = self.stack.pop()
+        obj: Value = self.stack[-1]
+        if obj.value_type != lookup.OBJECT:
+            raise Fault(FaultType.TYPE_ERROR)
+        struct_info = self.struct_table[obj.struct_id]
+        field_name = self.symbol_table[field_index]
+        if field_name not in struct_info:
+            raise Fault(FaultType.NO_FIELD_IN_OBJECT)
+        field_offset = struct_info[field_name]
+        obj.value[field_offset] = value
+
+    def __get_field(self, field_index=None) -> None:
+        self.__check_stack_underflow()
+        obj: Value = self.stack.pop()
+        if obj.value_type != lookup.OBJECT:
+            raise Fault(FaultType.TYPE_ERROR)
+        struct_info = self.struct_table[obj.struct_id]
+        field_name = self.symbol_table[field_index]
+        if field_name not in struct_info:
+            raise Fault(FaultType.NO_FIELD_IN_OBJECT)
+        field_offset = struct_info[field_name]
+        self.stack.append(obj.value[field_offset])
 
     def __set_index(self, _=None) -> None:
         self.__check_stack_underflow(size=1)

@@ -1,0 +1,20 @@
+NATIVE print
+
+STRUCT { x y }
+
+main 0 {
+    NEW_OBJ 0
+    PUSH 1
+    SET_FIELD x
+    PUSH 2
+    SET_FIELD y
+    STORE obj
+    POP
+    PUSH print
+    LOAD obj
+    GET_FIELD x
+    LOAD obj
+    GET_FIELD y
+    CALL 2
+    PUSH NONE RETURN
+}
