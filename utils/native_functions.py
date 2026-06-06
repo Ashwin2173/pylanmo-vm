@@ -59,6 +59,7 @@ def wrapper_value(value: Value) -> any:
         lookup.STRING: value.value,
         lookup.NONE: "null",
         lookup.BOOLEAN: "true" if value.value == 1 else "false",
+        lookup.OBJECT: f"<obj({value.struct_id}): {value.value}>"
     }
     if value.value_type == lookup.LIST:
         list_data = [wrapper_value(item) for item in value.value]

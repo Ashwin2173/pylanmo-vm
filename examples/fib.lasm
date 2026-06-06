@@ -1,4 +1,6 @@
-main {
+NATIVE print
+
+main 0 {
     PUSH 0 STORE count
     PUSH 0 STORE x1
     PUSH 1 STORE x2
@@ -13,10 +15,5 @@ main {
         LOAD count PUSH 9 BIN_OP 11
     JUMP_IF_FALSE start
 
-    PUSH NONE RETURN
-}
-
-print {
-    WRITE POP
     PUSH NONE RETURN
 }

@@ -5,8 +5,11 @@ from utils.parser import Function, Value, OpCode
 from utils.lookup import FaultType
 
 class VM:
-    def __init__(self, symbol_table: list[Value], function_table: dict[str, Function]):
+    def __init__(self, symbol_table: list[Value],
+                 struct_table: list[dict[Value, int]],
+                 function_table: dict[str, Function]):
         self.function_table = function_table
+        self.struct_table = struct_table
         self.symbol_table: list[Value] = symbol_table
 
         self.stack: list[Value] = list()
@@ -14,21 +17,24 @@ class VM:
         self.globals: dict[str, Value] = dict()
         self.memory: list[Value] = list()
         self.op_code_lookup: dict[int, callable] = {
-            lookup.OP_PUSH: self.__push,
-            lookup.OP_POP:  self.__pop,
-            lookup.OP_BIN:  self.__bin_op,
-            lookup.OP_UNARY: self.__unary_op,
-            lookup.OP_WRITE: self.__write,
-            lookup.OP_CALL: self.__call,
-            lookup.OP_RET:  self.__ret,
-            lookup.OP_JUMP: self.__jump,
+            lookup.OP_PUSH:          self.__push,
+            lookup.OP_POP:           self.__pop,
+            lookup.OP_BIN:           self.__bin_op,
+            lookup.OP_UNARY:         self.__unary_op,
+            lookup.OP_WRITE:         self.__write,
+            lookup.OP_CALL:          self.__call,
+            lookup.OP_RET:           self.__ret,
+            lookup.OP_JUMP:          self.__jump,
             lookup.OP_JUMP_IF_FALSE: self.__jump_if_false,
-            lookup.OP_DUP: self.__dup,
-            lookup.OP_STORE: self.__store,
-            lookup.OP_LOAD: self.__load,
-            lookup.OP_MAKE_LIST: self.__make_list,
-            lookup.OP_GET_INDEX: self.__get_index,
-            lookup.OP_SET_INDEX: self.__set_index,
+            lookup.OP_DUP:           self.__dup,
+            lookup.OP_STORE:         self.__store,
+            lookup.OP_LOAD:          self.__load,
+            lookup.OP_MAKE_LIST:     self.__make_list,
+            lookup.OP_GET_INDEX:     self.__get_index,
+            lookup.OP_SET_INDEX:     self.__set_index,
+            lookup.OP_NEW_OBJ:       self.__new_obj,
+            lookup.OP_GET_FIELD:     self.__get_field,
+            lookup.OP_SET_FIELD:     self.__set_field
         }
         self.op_unary = {
             lookup.UNA_BANG: lambda x: not x,
@@ -171,6 +177,37 @@ class VM:
             print(wrapper_value[peek.value_type])
             return
         print(f"<type({peek.value_type}): {peek.value}>")
+
+    def __new_obj(self, struct_id=None) -> None:
+        struct = self.struct_table[struct_id]
+        values = [Value(lookup.NONE, None) for _ in range(len(struct))]
+        struct_value: Value = Value(lookup.OBJECT, values, struct_id)
+        self.stack.append(struct_value)
+
+    def __set_field(self, field_index=None) -> None:
+        self.__check_stack_underflow(1)
+        value: Value = self.stack.pop()
+        obj: Value = self.stack[-1]
+        if obj.value_type != lookup.OBJECT:
+            raise Fault(FaultType.TYPE_ERROR)
+        struct_info = self.struct_table[obj.struct_id]
+        field_name = self.symbol_table[field_index]
+        if field_name not in struct_info:
+            raise Fault(FaultType.NO_FIELD_IN_OBJECT)
+        field_offset = struct_info[field_name]
+        obj.value[field_offset] = value
+
+    def __get_field(self, field_index=None) -> None:
+        self.__check_stack_underflow()
+        obj: Value = self.stack.pop()
+        if obj.value_type != lookup.OBJECT:
+            raise Fault(FaultType.TYPE_ERROR)
+        struct_info = self.struct_table[obj.struct_id]
+        field_name = self.symbol_table[field_index]
+        if field_name not in struct_info:
+            raise Fault(FaultType.NO_FIELD_IN_OBJECT)
+        field_offset = struct_info[field_name]
+        self.stack.append(obj.value[field_offset])
 
     def __set_index(self, _=None) -> None:
         self.__check_stack_underflow(size=1)
